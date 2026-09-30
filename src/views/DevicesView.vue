@@ -13,7 +13,7 @@ const filtered = computed(() => store.devices.filter((item) => (floor.value === 
 
 function addDevice() {
   if (!form.value.id || !form.value.name || !form.value.address) return
-  store.devices.push({ ...form.value })
+  store.addDevice({ ...form.value })
   dialog.value = false
   form.value = { id: '', name: '', type: '感烟探测器', floor: '1F', zone: 'A 区', address: '' }
 }

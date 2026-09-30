@@ -1,5 +1,5 @@
 import { ApolloClient, ApolloLink, InMemoryCache, Observable, gql } from '@apollo/client/core'
-import { seedDevices, seedRules } from '../stores/linkage'
+import { seedDevices, seedRules } from '../stores/seed'
 
 export const LINKAGE_QUERY = gql`
   query LinkageConfiguration {

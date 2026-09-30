@@ -29,8 +29,8 @@ const items = [
       </v-list>
       <template #append>
         <div class="side-status">
-          <div><span class="status-dot" :class="{ locked: store.locked }" />{{ store.locked ? '基线已签字锁定' : '协同编辑中' }}</div>
-          <small>版本 R{{ store.revision }} · {{ store.validations.length }} 项校验提示</small>
+          <div><span class="status-dot" :class="{ locked: store.locked, offline: !store.online }" />{{ store.locked ? '基线已签字锁定' : store.online ? '协同编辑中' : '断网 · 批次记录中' }}</div>
+          <small>基线 R{{ store.remoteRevision }} · 本机 R{{ store.revision }} · {{ store.validations.length }} 项校验提示</small>
         </div>
       </template>
     </v-navigation-drawer>
@@ -39,7 +39,9 @@ const items = [
       <v-app-bar-nav-icon class="d-md-none" @click="drawer = !drawer" />
       <v-app-bar-title>{{ title }}</v-app-bar-title>
       <v-spacer />
-      <v-chip size="small" variant="tonal" color="success" prepend-icon="mdi-cloud-check-outline">草稿自动保存</v-chip>
+      <v-chip size="small" variant="tonal" :color="store.online ? 'success' : 'warning'" :prepend-icon="store.online ? 'mdi-cloud-check-outline' : 'mdi-cloud-off-outline'">
+        {{ store.online ? '在线' : '断网' }} · 批次 {{ store.batchProgress.applied }}/{{ store.batchProgress.total }}
+      </v-chip>
     </v-app-bar>
 
     <v-main>
@@ -61,5 +63,6 @@ const items = [
 .side-status small { display: block; margin-top: 6px; color: #93a7ad; font-size: 9px; }
 .status-dot { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; background: #59b58a; }
 .status-dot.locked { background: #d79a45; }
+.status-dot.offline { background: #d28a2d; }
 .app-bar { border-bottom: 1px solid #e0e5e5; background: white; }
 </style>

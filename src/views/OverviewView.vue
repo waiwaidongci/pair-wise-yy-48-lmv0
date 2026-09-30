@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { LINKAGE_QUERY } from '../api/apollo'
 import { useLinkageStore } from '../stores/linkage'
+import BatchPanel from '../components/BatchPanel.vue'
 
 const store = useLinkageStore()
 const { result } = useQuery(LINKAGE_QUERY)
@@ -23,6 +24,8 @@ const warningCount = computed(() => store.validations.filter((item) => item.seve
         <v-btn color="primary" prepend-icon="mdi-check-decagram-outline" @click="$router.push('/review')">进入审阅</v-btn>
       </div>
     </div>
+
+    <BatchPanel />
 
     <div class="metric-grid">
       <article><span>点位总数</span><strong>{{ store.devices.length }}</strong><small>覆盖 2 个楼层分区</small></article>
