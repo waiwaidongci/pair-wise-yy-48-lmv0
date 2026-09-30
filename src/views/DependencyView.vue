@@ -16,8 +16,8 @@ function targetY(id: string) { return actionY(actions.value.findIndex((item) => 
 <template>
   <section class="page">
     <div class="page-head">
-      <div><p class="eyebrow">DEPENDENCY GRAPH / 条件依赖</p><h1>触发、互锁与动作路径</h1><p class="muted">点击规则连线定位具体因果关系；跨区连线显示为橙色警示。</p></div>
-      <v-chip variant="tonal" prepend-icon="mdi-alert-outline">{{ store.validations.length }} 个待确认路径</v-chip>
+      <div><p class="eyebrow">DEPENDENCY GRAPH / 条件依赖</p><h1>触发、互锁与动作路径</h1><p class="muted">设备、规则或签字状态变化时本图随校验与审阅状态一起失效重算；点击规则连线定位具体因果关系。</p></div>
+      <v-chip variant="tonal" :prepend-icon="store.dependencyValid ? 'mdi-graph-outline' : 'mdi-cog-sync-outline'" :color="store.dependencyValid ? 'default' : 'warning'">{{ store.dependencyValid ? `${store.validations.length} 个待确认路径` : '依赖图失效重算中' }}</v-chip>
     </div>
 
     <div class="graph-wrap panel">
@@ -52,9 +52,10 @@ function targetY(id: string) { return actionY(actions.value.findIndex((item) => 
       <div class="graph-side" v-if="selectedRule">
         <v-btn icon="mdi-close" size="small" variant="text" @click="selectedRule = null" />
         <strong>{{ selectedRule }}</strong>
-        <v-select :model-value="store.rules.find((rule) => rule.id === selectedRule)?.priority" :items="[1,2,3]" label="优先级" density="compact" />
-        <v-text-field :model-value="store.rules.find((rule) => rule.id === selectedRule)?.interlock" label="互锁条件" density="compact" />
-        <v-switch :model-value="store.rules.find((rule) => rule.id === selectedRule)?.enabled" label="规则启用" color="primary" @update:model-value="store.updateRule(selectedRule!, { enabled: Boolean($event) })" />
+        <v-select :model-value="store.rules.find((rule) => rule.id === selectedRule)?.priority" :items="[1,2,3]" label="优先级" density="compact" :disabled="store.locked" />
+        <v-text-field :model-value="store.rules.find((rule) => rule.id === selectedRule)?.interlock" label="互锁条件" density="compact" :disabled="store.locked" />
+        <v-switch :model-value="store.rules.find((rule) => rule.id === selectedRule)?.enabled" :disabled="store.locked" label="规则启用" color="primary" @update:model-value="store.updateRule(selectedRule!, { enabled: Boolean($event) })" />
+        <small v-if="store.locked" class="muted">基线已签字，图与配置只读。</small>
       </div>
     </div>
   </section>

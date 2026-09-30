@@ -23,9 +23,16 @@ const rows = computed(() => store.rules.filter((rule) => {
   <section class="page">
     <div class="page-head">
       <div><p class="eyebrow">CAUSE & EFFECT / 因果矩阵</p><h1>触发条件到动作结果</h1><p class="muted">配置延时、互锁、优先级和抑制条件；矩阵校验实时阻断矛盾规则。</p></div>
-      <div class="actions"><v-btn variant="outlined" prepend-icon="mdi-check-all" @click="store.validations.length && $router.push('/review')">校验 {{ store.validations.length }} 项</v-btn><v-btn color="primary" prepend-icon="mdi-plus" @click="store.addRule">新增规则</v-btn></div>
+      <div class="actions">
+        <v-btn variant="outlined" prepend-icon="mdi-clipboard-arrow-left-outline" :to="'/handoff'">{{ store.batch ? `本机批次 ${store.batch.changes.length} 条` : '现场批次交接' }}</v-btn>
+        <v-btn variant="outlined" prepend-icon="mdi-check-all" @click="store.validations.length && $router.push('/review')">校验 {{ store.validations.length }} 项</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="store.addRule">新增规则</v-btn>
+      </div>
     </div>
 
+    <v-alert v-if="store.locked" type="warning" variant="tonal" density="compact" class="mb-3">当前基线已签字锁定，规则只读；如需修订请到版本审阅解锁。</v-alert>
+    <v-alert v-else-if="!store.online" type="info" variant="tonal" density="compact" class="mb-3">本机断网中：所有改动按序号记入本机批次（打开版本 R{{ store.batch?.openedAtRevision ?? store.serverSnapshot.initialRev }}），恢复连接后到「现场批次交接」推进。</v-alert>
+    <v-alert v-else-if="store.batch" type="success" variant="tonal" density="compact" class="mb-3">本机有 {{ store.batch.changes.length }} 条有序改动待交接，基线未变将整批推进、基线前进将逐条重放。</v-alert>
     <v-alert v-if="store.validations.length" type="warning" variant="tonal" density="compact" class="mb-3">
       发现 {{ store.validations.filter((item) => item.severity === '错误').length }} 个错误和 {{ store.validations.filter((item) => item.severity === '警告').length }} 个警告。跨区冲突、重复动作与互锁矛盾需要审阅确认。
     </v-alert>
@@ -59,7 +66,10 @@ const rows = computed(() => store.rules.filter((rule) => {
             <td><v-select :model-value="rule.priority" :items="[1,2,3]" density="compact" hide-details style="width:82px" @update:model-value="store.updateRule(rule.id, { priority: Number($event) as 1|2|3 })" /></td>
             <td>{{ rule.suppression }}</td>
             <td><v-switch :model-value="rule.enabled" color="primary" hide-details density="compact" @update:model-value="store.updateRule(rule.id, { enabled: Boolean($event) })" /></td>
-            <td><v-chip v-if="store.validations.some((item) => item.ruleIds.includes(rule.id))" size="x-small" color="error" variant="tonal">需处理</v-chip><span v-else class="muted">—</span></td>
+            <td>
+              <v-chip v-if="store.validations.some((item) => item.ruleIds.includes(rule.id))" size="x-small" color="error" variant="tonal">需处理</v-chip>
+              <v-btn v-else icon="mdi-delete-outline" size="x-small" variant="text" @click="store.deleteRule(rule.id)" />
+            </td>
           </tr>
         </tbody>
       </v-data-table>
